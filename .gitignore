@@ -1,0 +1,14 @@
+# Dependências
+node_modules/
+
+# Variáveis de ambiente
+.env
+.env.local
+
+# Arquivos temporários do banco
+data/*.tmp
+
+# Logs e arquivos de sistema
+*.log
+.DS_Store
+.system_generated/

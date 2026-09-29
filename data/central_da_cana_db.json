@@ -1,0 +1,458 @@
+{
+  "settings": {
+    "businessName": "Central da Cana",
+    "ownerName": "Josué",
+    "address": "Av. Goiânia, 346 - Jardim Santa Marta",
+    "city": "Rondonópolis - MT",
+    "phone": "66999536712",
+    "phoneFormatted": "(66) 99953-6712",
+    "pixKey": "66996833628",
+    "pixType": "Telefone",
+    "adminUser": "josue",
+    "adminPass": "cana123",
+    "isOpen": true,
+    "openingHours": "Terça a Domingo das 09:00 às 20:00",
+    "attendants": {
+      "day": {
+        "id": "alexa",
+        "name": "Alexa",
+        "role": "Pedir com Alexa",
+        "phone": "66999536712",
+        "phoneFormatted": "(66) 99953-6712",
+        "startHour": 9,
+        "endHour": 17,
+        "scheduleLabel": "09h às 17h"
+      },
+      "evening": {
+        "id": "josue",
+        "name": "Josué",
+        "role": "Pedir com Josué",
+        "phone": "66996833628",
+        "phoneFormatted": "(66) 99683-3628",
+        "startHour": 17,
+        "endHour": 20,
+        "scheduleLabel": "17h às 20h"
+      }
+    },
+    "developer": {
+      "brand": "NyxCipher",
+      "creator": "Alexa",
+      "phone": "66996128149",
+      "phoneFormatted": "(66) 99612-8149",
+      "tagline": "Desenvolvimento de Software & Sistemas Inteligentes"
+    },
+    "bairros": [
+      {
+        "id": "b1",
+        "name": "Jardim Santa Marta (Local)",
+        "fee": 4,
+        "time": "15-25 min"
+      },
+      {
+        "id": "b2",
+        "name": "Vila Aurora I e II",
+        "fee": 7,
+        "time": "20-35 min"
+      },
+      {
+        "id": "b3",
+        "name": "Centro",
+        "fee": 6,
+        "time": "20-30 min"
+      },
+      {
+        "id": "b4",
+        "name": "Sagrada Família",
+        "fee": 7,
+        "time": "25-35 min"
+      },
+      {
+        "id": "b5",
+        "name": "Coophalis",
+        "fee": 6,
+        "time": "20-30 min"
+      },
+      {
+        "id": "b6",
+        "name": "Vila Operária",
+        "fee": 8,
+        "time": "25-40 min"
+      },
+      {
+        "id": "b7",
+        "name": "Jardim Guanabara",
+        "fee": 7,
+        "time": "20-35 min"
+      },
+      {
+        "id": "b8",
+        "name": "Monte Líbano",
+        "fee": 6,
+        "time": "20-30 min"
+      },
+      {
+        "id": "b9",
+        "name": "Parque Real",
+        "fee": 5,
+        "time": "15-25 min"
+      },
+      {
+        "id": "b10",
+        "name": "Cidade Salmen",
+        "fee": 9,
+        "time": "30-45 min"
+      },
+      {
+        "id": "b0",
+        "name": "Retirar no Balcão (Av. Goiânia, 346)",
+        "fee": 0,
+        "time": "Pronto em 10 min"
+      }
+    ]
+  },
+  "products": [
+    {
+      "id": "prod-1",
+      "name": "Caldo de Cana Gelado - 500ml",
+      "category": "caldo_puro",
+      "price": 8,
+      "costPrice": 2.2,
+      "unit": "Garrafa 500ml",
+      "description": "Moído na hora e extremamente gelado. 100% puro e filtrado.",
+      "icon": "🥤",
+      "inStock": true,
+      "isB2B": false
+    },
+    {
+      "id": "prod-2",
+      "name": "Caldo de Cana Gelado - 1 Litro e Meio",
+      "category": "caldo_puro",
+      "price": 20,
+      "costPrice": 4,
+      "unit": "Garrafa 1,5L",
+      "description": "Tamanho família, fresquinho e super refrescante para o calor de Rondonópolis.",
+      "icon": "🧃",
+      "inStock": true,
+      "isB2B": false
+    },
+    {
+      "id": "prod-3",
+      "name": "Caldo de Cana Gelado - 2 Litros (Super Família)",
+      "category": "caldo_puro",
+      "price": 25,
+      "costPrice": 7.5,
+      "unit": "Garrafa 2L",
+      "description": "A melhor opção para o almoço de domingo ou churrasco.",
+      "icon": "🍶",
+      "inStock": true,
+      "isB2B": false
+    },
+    {
+      "id": "prod-4",
+      "name": "Caldo de Cana c/ Limão Galego",
+      "category": "caldo_sabores",
+      "price": 14,
+      "costPrice": 4.8,
+      "unit": "Garrafa 500ML",
+      "description": "Cana pura com toque cítrico de limão espremido na hora. Campeão de vendas!",
+      "icon": "🍋",
+      "inStock": true,
+      "isB2B": false
+    },
+    {
+      "id": "prod-5",
+      "name": "Caldo de Cana c/ Abacaxi",
+      "category": "caldo_sabores",
+      "price": 14,
+      "costPrice": 5.2,
+      "unit": "Garrafa 500ML",
+      "description": "Moído junto com abacaxi maduro geladinho. Sabor tropical inconfundível.",
+      "icon": "🍍",
+      "inStock": true,
+      "isB2B": false
+    },
+    {
+      "id": "prod-6",
+      "name": "Caldo de Cana c/ Maracujá (1L)",
+      "category": "caldo_sabores",
+      "price": 19,
+      "costPrice": 5.5,
+      "unit": "Garrafa 1L",
+      "description": "O azedinho perfeito do maracujá com a doçura natural da cana.",
+      "icon": "🥭",
+      "inStock": false,
+      "isB2B": false
+    },
+    {
+      "id": "prod-7",
+      "name": "Caldo de Cana c/ Gengibre & Limão",
+      "category": "caldo_sabores",
+      "price": 14,
+      "costPrice": 5,
+      "unit": "Garrafa 500ML",
+      "description": "Ultra refrescante, revigorante e energizante com limão e gengibre fresco.",
+      "icon": "🫚",
+      "inStock": true,
+      "isB2B": false
+    },
+    {
+      "id": "prod-8",
+      "name": "Toletes de Cana Descascada",
+      "category": "lanches",
+      "price": 10,
+      "costPrice": 3,
+      "unit": "500ML",
+      "description": "Toletes selecionados, macios e doces, prontos para mastigar.",
+      "icon": "🎋",
+      "inStock": true,
+      "isB2B": false
+    },
+    {
+      "id": "prod-b2b-1",
+      "name": "Feixe de Cana Selecionada (15 Varas)",
+      "category": "b2b_atacado",
+      "price": 45,
+      "costPrice": 22,
+      "unit": "Feixe (~25kg)",
+      "description": "Cana de alta qualidade, grossa, rica em sacarose e lavada. Ideal para garapeiros e pastelarias.",
+      "icon": "🌾",
+      "inStock": false,
+      "isB2B": false
+    },
+    {
+      "id": "prod-b2b-2",
+      "name": "Feixe de Cana Raspada / Descascada",
+      "category": "b2b_atacado",
+      "price": 60,
+      "costPrice": 28,
+      "unit": "Feixe Pronto (15 varas)",
+      "description": "Economize tempo e mão de obra. Feixe já raspado e higienizado para moer direto.",
+      "icon": "✨",
+      "inStock": false,
+      "isB2B": false
+    },
+    {
+      "id": "prod-b2b-3",
+      "name": "Bombona de Caldo Cru Refrigerado - 20 Litros",
+      "category": "b2b_atacado",
+      "price": 140,
+      "costPrice": 70,
+      "unit": "Bombona 20L",
+      "description": "Caldo moído em moenda inox profissional, duplamente filtrado e mantido em câmara fria.",
+      "icon": "🛢️",
+      "inStock": false,
+      "isB2B": false
+    },
+    {
+      "id": "prod-b2b-4",
+      "name": "Fardo de Garrafas PET 1L c/ Tampas Lacráveis (100 un)",
+      "category": "b2b_atacado",
+      "price": 85,
+      "costPrice": 55,
+      "unit": "Fardo 100 un",
+      "description": "Garrafas transparentes virgens padrão alimentício para envase profissional.",
+      "icon": "📦",
+      "inStock": false,
+      "isB2B": false
+    }
+  ],
+  "b2bClients": [],
+  "orders": [
+    {
+      "id": "ord-1790645685780",
+      "code": "PED-1001",
+      "type": "b2c_balcao",
+      "customerName": "alexa",
+      "customerPhone": "66996128149",
+      "b2bClientId": null,
+      "address": "Retirada no Balcão (Av. Goiânia, 346 - Jd. Santa Marta)",
+      "bairro": "Retirar no Balcão (Av. Goiânia, 346)",
+      "deliveryFee": 0,
+      "items": [
+        {
+          "id": "prod-2",
+          "name": "Caldo de Cana Gelado - 1 Litro e Meio",
+          "quantity": 1,
+          "price": 20,
+          "total": 20
+        }
+      ],
+      "subtotal": 20,
+      "total": 20,
+      "paymentMethod": "dinheiro",
+      "paymentStatus": "pendente",
+      "status": "novo",
+      "changeFor": null,
+      "notes": "",
+      "createdAt": "2026-09-29T01:34:45.780Z"
+    }
+  ],
+  "financial": [
+    {
+      "id": "fin-1790645310023",
+      "type": "receita",
+      "category": "venda_delivery",
+      "description": "Venda Concluída - Pedido #PED-1014 (Ana Paula Silva)",
+      "amount": 34,
+      "paymentMethod": "pix",
+      "relatedOrderId": "ord-1790645310021",
+      "date": "2026-09-29",
+      "createdAt": "2026-09-29T01:28:30.023Z"
+    },
+    {
+      "id": "fin-1790645310025",
+      "type": "despesa",
+      "category": "compra_cana_bruta",
+      "description": "Carga de Cana Sítio Recanto Verde (30 feixes)",
+      "amount": 540,
+      "paymentMethod": "pix",
+      "relatedOrderId": null,
+      "date": "2026-09-29",
+      "createdAt": "2026-09-29T01:28:30.025Z"
+    },
+    {
+      "id": "fin-1790645310034",
+      "type": "receita",
+      "category": "venda_delivery",
+      "description": "Venda Concluída - Pedido #PED-1015 (Cliente Motoboy Teste)",
+      "amount": 37,
+      "paymentMethod": "dinheiro",
+      "relatedOrderId": "ord-1790645310032",
+      "date": "2026-09-29",
+      "createdAt": "2026-09-29T01:28:30.034Z"
+    },
+    {
+      "id": "fin-1790645310036",
+      "type": "despesa",
+      "category": "combustivel_entrega",
+      "description": "Acerto Corridas Motoboy: Carlos Motoboy Teste (1 entregas x R$ 6.00)",
+      "amount": 6,
+      "paymentMethod": "pix",
+      "relatedOrderId": null,
+      "date": "2026-09-29",
+      "createdAt": "2026-09-29T01:28:30.036Z"
+    },
+    {
+      "id": "fin-1790645393628",
+      "type": "receita",
+      "category": "venda_delivery",
+      "description": "Venda Concluída - Pedido #PED-1017 (Ana Paula Silva)",
+      "amount": 34,
+      "paymentMethod": "pix",
+      "relatedOrderId": "ord-1790645393625",
+      "date": "2026-09-29",
+      "createdAt": "2026-09-29T01:29:53.628Z"
+    },
+    {
+      "id": "fin-1790645393630",
+      "type": "despesa",
+      "category": "compra_cana_bruta",
+      "description": "Carga de Cana Sítio Recanto Verde (30 feixes)",
+      "amount": 540,
+      "paymentMethod": "pix",
+      "relatedOrderId": null,
+      "date": "2026-09-29",
+      "createdAt": "2026-09-29T01:29:53.630Z"
+    },
+    {
+      "id": "fin-1790645393639",
+      "type": "receita",
+      "category": "venda_delivery",
+      "description": "Venda Concluída - Pedido #PED-1018 (Cliente Motoboy Teste)",
+      "amount": 37,
+      "paymentMethod": "dinheiro",
+      "relatedOrderId": "ord-1790645393637",
+      "date": "2026-09-29",
+      "createdAt": "2026-09-29T01:29:53.639Z"
+    },
+    {
+      "id": "fin-1790645393640",
+      "type": "despesa",
+      "category": "combustivel_entrega",
+      "description": "Acerto Corridas Motoboy: Carlos Motoboy Teste (1 entregas x R$ 6.00)",
+      "amount": 6,
+      "paymentMethod": "pix",
+      "relatedOrderId": null,
+      "date": "2026-09-29",
+      "createdAt": "2026-09-29T01:29:53.640Z"
+    }
+  ],
+  "inventory": [
+    {
+      "id": "inv-1",
+      "name": "Feixes de Cana Bruta (Estoque Pátio)",
+      "unit": "Feixes",
+      "currentQty": 42,
+      "minQty": 15
+    },
+    {
+      "id": "inv-2",
+      "name": "Cana Raspada Pronta para Moagem",
+      "unit": "Feixes",
+      "currentQty": 8,
+      "minQty": 5
+    },
+    {
+      "id": "inv-3",
+      "name": "Garrafas PET 1 Litro com Tampa",
+      "unit": "Unidades",
+      "currentQty": 380,
+      "minQty": 100
+    },
+    {
+      "id": "inv-4",
+      "name": "Garrafas PET 500ml com Tampa",
+      "unit": "Unidades",
+      "currentQty": 240,
+      "minQty": 80
+    },
+    {
+      "id": "inv-5",
+      "name": "Garrafas PET 2 Litros com Tampa",
+      "unit": "Unidades",
+      "currentQty": 95,
+      "minQty": 40
+    },
+    {
+      "id": "inv-6",
+      "name": "Copos Descartáveis 500ml",
+      "unit": "Unidades",
+      "currentQty": 500,
+      "minQty": 150
+    },
+    {
+      "id": "inv-7",
+      "name": "Limão Galego Fresco",
+      "unit": "kg",
+      "currentQty": 25,
+      "minQty": 8
+    },
+    {
+      "id": "inv-8",
+      "name": "Abacaxi Pérola Selecionado",
+      "unit": "Unidades",
+      "currentQty": 18,
+      "minQty": 6
+    }
+  ],
+  "motoboys": [
+    {
+      "id": "moto-1",
+      "name": "Tiago Silva (Motoboy)",
+      "phone": "66998112233",
+      "vehicle": "Honda Fan 160 (Preta) - Placa RND-4021",
+      "feePerDelivery": 5,
+      "active": true,
+      "createdAt": "2026-09-20T10:00:00Z"
+    },
+    {
+      "id": "moto-2",
+      "name": "Lucas Ferreira (Entrega)",
+      "phone": "66997445566",
+      "vehicle": "Yamaha Factor 150 (Vermelha) - Placa RND-8890",
+      "feePerDelivery": 5,
+      "active": true,
+      "createdAt": "2026-09-22T14:00:00Z"
+    }
+  ]
+}

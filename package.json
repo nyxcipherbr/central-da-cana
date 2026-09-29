@@ -1,0 +1,17 @@
+{
+  "name": "central-da-cana-rondonopolis",
+  "version": "1.0.0",
+  "description": "Sistema de Distribuição & Delivery - Central da Cana (Josué - Rondonópolis)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": ["caldo-de-cana", "delivery", "distribuidora", "rondonopolis", "nyxcipher"],
+  "author": "NyxCipher (Alexa)",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}
