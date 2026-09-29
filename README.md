@@ -90,8 +90,15 @@ Para acessar o Painel de Gestão:
   - Lançamento de despesas (compra de cana bruta, garrafas PET, acerto de motoboy, luz).
   - Controle de **Contas a Receber** de clientes fiados/faturados do atacado.
 - **Controle de Estoque:** Monitoramento de feixes de cana e embalagens com alerta de reposição.
+- **Criação Manual e Exclusão de Pedidos:**
+  - Botão `➕ Fazer Novo Pedido (ADM)` para lançar vendas de balcão e WhatsApp diretamente no sistema.
+  - Botão `🗑️ Excluir` em cada card do Kanban com diálogo de confirmação seguro.
 
-### 4. Rodapé Promocional NyxCipher
+### 4. 📲 Aplicativo Instalável (PWA) & 🔔 Alarme Sonoro de Pedidos
+- **PWA Mobile App:** Botão "📲 Baixar App" para instalar diretamente na tela inicial do celular Android e iPhone.
+- **Alarme Sonoro Tipo Despertador:** Emite campainha musical com Web Audio API a cada novo pedido que entra no sistema, com banner de aviso piscante e controle de ligar/desligar.
+
+### 5. Rodapé Promocional NyxCipher
 Em todas as telas (cliente e painel), há o selo oficial:
 > *"Desenvolvido com excelência por **NyxCipher** (Alexa) • Soluções em Software & Sistemas"*
 > Com link inteligente para o WhatsApp `(66) 99612-8149` para captação de novos clientes empresariais na cidade.
