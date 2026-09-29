@@ -1,5 +1,5 @@
 // Service Worker da Central da Cana
-const CACHE_NAME = 'central-da-cana-v1';
+const CACHE_NAME = 'central-da-cana-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -36,17 +36,23 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Estratégia Stale-While-Revalidate: abre instantaneamente do cache do celular
+  // enquanto busca atualizações em segundo plano sem travar a tela
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        if (response && response.status === 200) {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
-        }
-        return response;
-      })
-      .catch(() => caches.match(event.request))
+    caches.match(event.request).then((cachedResponse) => {
+      const fetchPromise = fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseClone);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => cachedResponse);
+
+      return cachedResponse || fetchPromise;
+    })
   );
 });
