@@ -12,6 +12,11 @@ const state = {
   cart: [],
   selectedCategory: 'todos',
   selectedBairroId: 'b1',
+  deliveryMode: 'delivery',
+  calculatedKm: 1.2,
+  isCondominio: false,
+  calculatedDeliveryFee: 8.00,
+  deliveryKmPricing: null,
   alarmEnabled: localStorage.getItem('central_da_cana_alarm_enabled') !== 'false',
   knownOrderIds: new Set(),
   // ADM
@@ -49,6 +54,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
 document.addEventListener('DOMContentLoaded', async () => {
   await loadSettings();
   await loadProducts();
+  await loadDeliveryKmPricing();
   setupBairrosDropdown();
   renderProductsB2C();
   renderProductsB2B();
@@ -424,15 +430,17 @@ function setupBairrosDropdown() {
   const b2bSelect = document.getElementById('b2b-form-bairro');
   if (!state.settings || !state.settings.bairros) return;
 
-  select.innerHTML = '';
+  if (select) select.innerHTML = '';
   if (b2bSelect) b2bSelect.innerHTML = '';
 
   state.settings.bairros.forEach(b => {
     const feeText = b.fee === 0 ? 'Grátis' : `+ R$ ${b.fee.toFixed(2)}`;
-    const opt = document.createElement('option');
-    opt.value = b.id;
-    opt.textContent = `${b.name} (${feeText} • ${b.time})`;
-    select.appendChild(opt);
+    if (select) {
+      const opt = document.createElement('option');
+      opt.value = b.id;
+      opt.textContent = `${b.name} (${feeText} • ${b.time})`;
+      select.appendChild(opt);
+    }
 
     if (b2bSelect && b.id !== 'b0') {
       const optB2B = document.createElement('option');
@@ -443,8 +451,10 @@ function setupBairrosDropdown() {
   });
 
   // Default para Jd. Santa Marta
-  select.value = 'b1';
-  state.selectedBairroId = 'b1';
+  if (select) {
+    select.value = 'b1';
+    state.selectedBairroId = 'b1';
+  }
 }
 
 // ==========================================
@@ -698,18 +708,105 @@ function toggleCartDrawer() {
   }
 }
 
-function updateCartDeliveryFee() {
-  const select = document.getElementById('cart-bairro-select');
-  state.selectedBairroId = select.value;
-
-  const addrWrapper = document.getElementById('cart-address-wrapper');
-  if (state.selectedBairroId === 'b0') {
-    // Retirada no balcão
-    addrWrapper.classList.add('hidden');
-  } else {
-    addrWrapper.classList.remove('hidden');
+async function loadDeliveryKmPricing() {
+  try {
+    const res = await fetch(`${API_BASE}/delivery-km`);
+    if (res.ok) {
+      state.deliveryKmPricing = await res.json();
+      updateAdminKmPricingUI();
+    }
+  } catch (e) {
+    console.warn('Erro ao carregar tabela de KM:', e);
   }
+}
 
+function setCartDeliveryMode(mode) {
+  state.deliveryMode = mode;
+  const delBtn = document.getElementById('cart-type-delivery-btn');
+  const balBtn = document.getElementById('cart-type-balcao-btn');
+  const delFields = document.getElementById('cart-delivery-fields');
+  const balInfo = document.getElementById('cart-balcao-info');
+
+  if (mode === 'balcao') {
+    if (delBtn) delBtn.className = "py-2 rounded-lg text-stone-700 hover:text-stone-900 transition flex items-center justify-center gap-1.5";
+    if (balBtn) balBtn.className = "py-2 rounded-lg bg-cana-800 text-white shadow transition flex items-center justify-center gap-1.5";
+    if (delFields) delFields.classList.add('hidden');
+    if (balInfo) balInfo.classList.remove('hidden');
+  } else {
+    if (delBtn) delBtn.className = "py-2 rounded-lg bg-cana-800 text-white shadow transition flex items-center justify-center gap-1.5";
+    if (balBtn) balBtn.className = "py-2 rounded-lg text-stone-700 hover:text-stone-900 transition flex items-center justify-center gap-1.5";
+    if (delFields) delFields.classList.remove('hidden');
+    if (balInfo) balInfo.classList.add('hidden');
+    calculateCartKmDeliveryFee();
+  }
+  renderCartItems();
+}
+
+let kmDebounceTimeout = null;
+function debounceCalculateKm() {
+  clearTimeout(kmDebounceTimeout);
+  kmDebounceTimeout = setTimeout(() => {
+    calculateCartKmDeliveryFee();
+  }, 400);
+}
+
+async function calculateCartKmDeliveryFee(lat = null, lng = null) {
+  const addrInput = document.getElementById('cart-customer-address');
+  const condoCheckbox = document.getElementById('cart-is-condominio');
+  const address = addrInput ? addrInput.value.trim() : '';
+  const isCondominio = condoCheckbox ? condoCheckbox.checked : false;
+
+  state.isCondominio = isCondominio;
+
+  try {
+    const res = await fetch(`${API_BASE}/delivery/calculate-km`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address, lat, lng, isCondominio })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      state.calculatedKm = data.distanceKm;
+      state.calculatedDeliveryFee = data.deliveryFee;
+
+      const distLabel = document.getElementById('cart-km-dist-label');
+      const feeLabel = document.getElementById('cart-km-fee-label');
+      if (distLabel) distLabel.textContent = `Distância: ~${data.distanceKm} km`;
+      if (feeLabel) feeLabel.textContent = `Taxa: R$ ${data.deliveryFee.toFixed(2)}`;
+
+      renderCartItems();
+    }
+  } catch (err) {
+    console.error('Erro ao calcular taxa por km:', err);
+  }
+}
+
+function detectUserGpsLocation() {
+  if (!navigator.geolocation) {
+    showToast('Geolocalização não suportada no seu navegador.', 'error');
+    return;
+  }
+  showToast('Obtendo sua localização GPS...', 'info');
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      const addrInput = document.getElementById('cart-customer-address');
+      if (addrInput && !addrInput.value) {
+        addrInput.value = 'Minha Localização Atual (GPS)';
+      }
+      calculateCartKmDeliveryFee(lat, lng);
+      showToast('Distância calculada via GPS com sucesso!', 'success');
+    },
+    (err) => {
+      console.warn('GPS error:', err);
+      showToast('Não foi possível obter o GPS. Digite o endereço ou bairro.', 'warning');
+    },
+    { enableHighAccuracy: true, timeout: 8000 }
+  );
+}
+
+function updateCartDeliveryFee() {
   renderCartItems();
 }
 
@@ -771,11 +868,12 @@ function renderCartItems() {
     container.appendChild(row);
   });
 
-  // Calcula taxa de entrega
+  // Calcula taxa de entrega por KM ou Balcão
   let fee = 0;
-  if (state.settings && state.settings.bairros) {
-    const b = state.settings.bairros.find(b => b.id === state.selectedBairroId);
-    if (b) fee = b.fee;
+  if (state.deliveryMode === 'balcao') {
+    fee = 0.00;
+  } else {
+    fee = state.calculatedDeliveryFee !== undefined && state.calculatedDeliveryFee !== null ? state.calculatedDeliveryFee : 8.00;
   }
 
   updateCartTotals(subtotal, fee);
@@ -856,11 +954,12 @@ async function submitDeliveryOrder() {
     return;
   }
 
-  const bairroObj = state.settings.bairros.find(b => b.id === state.selectedBairroId);
-  const bairroName = bairroObj ? bairroObj.name : 'Jardim Santa Marta';
-  const fee = bairroObj ? bairroObj.fee : 0;
+  const isBalcao = state.deliveryMode === 'balcao';
+  const fee = isBalcao ? 0.00 : (state.calculatedDeliveryFee !== undefined && state.calculatedDeliveryFee !== null ? state.calculatedDeliveryFee : 8.00);
+  const distanceKm = isBalcao ? 0.0 : (state.calculatedKm || 1.2);
+  const isCondominio = isBalcao ? false : !!state.isCondominio;
 
-  if (state.selectedBairroId === 'b0') {
+  if (isBalcao) {
     address = 'Retirada no Balcão (Av. Goiânia, 346 - Jd. Santa Marta)';
   } else if (!address) {
     if (addressInput) {
@@ -868,7 +967,7 @@ async function submitDeliveryOrder() {
       addressInput.classList.add('ring-2', 'ring-red-500');
       setTimeout(() => addressInput.classList.remove('ring-2', 'ring-red-500'), 3000);
     }
-    showToast('Informe o endereço de entrega (Rua, Número e Referência)!', 'error');
+    showToast('Informe o endereço de entrega (Rua, Número e Bairro)!', 'error');
     return;
   }
 
@@ -876,11 +975,13 @@ async function submitDeliveryOrder() {
   const total = subtotal + fee;
 
   const orderPayload = {
-    type: state.selectedBairroId === 'b0' ? 'b2c_balcao' : 'b2c_delivery',
+    type: isBalcao ? 'b2c_balcao' : 'b2c_delivery',
     customerName: name,
     customerPhone: phone,
     address: address,
-    bairro: bairroName,
+    bairro: isBalcao ? 'Balcão' : 'Rondonópolis',
+    distanceKm: distanceKm,
+    isCondominio: isCondominio,
     deliveryFee: fee,
     subtotal: subtotal,
     total: total,
@@ -940,14 +1041,12 @@ async function submitDeliveryOrder() {
 ----------------------------------------
 👤 *Cliente:* ${name}
 📱 *WhatsApp:* ${phone}
-📍 *Bairro:* ${bairroName}
-🏠 *Endereço:* ${address}
-----------------------------------------
+${isBalcao ? '🏬 *Tipo:* Retirada no Balcão (Av. Goiânia, 346)\n' : `🏠 *Endereço:* ${address}\n📏 *Distância:* ~${distanceKm} km (Saída: Jd. Santa Marta)\n${isCondominio ? '🏢 *Condomínio:* Sim (+ R$ 5,00)\n' : ''}`}----------------------------------------
 🛒 *ITENS DO PEDIDO:*
 ${itemsFormatted}
 ----------------------------------------
 💵 Subtotal: R$ ${subtotal.toFixed(2)}
-🛵 Taxa de Entrega: ${fee === 0 ? 'Grátis (Balcão)' : `R$ ${fee.toFixed(2)}`}
+🛵 Taxa de Entrega: ${fee === 0 ? 'Grátis (Balcão)' : `R$ ${fee.toFixed(2)} (~${distanceKm} km)`}
 *💰 TOTAL A PAGAR: R$ ${total.toFixed(2)}*
 💳 *Forma de Pagamento:* ${paymentText}
 ----------------------------------------
@@ -1357,29 +1456,17 @@ function openModalAdminCreateOrder() {
   const modal = document.getElementById('modal-admin-create-order');
   if (!modal) return;
 
-  // Carrega opções de bairros de Rondonópolis
-  const bairroSelect = document.getElementById('admin-order-bairro-select');
-  bairroSelect.innerHTML = '';
-  if (state.settings && state.settings.bairros) {
-    state.settings.bairros.forEach(b => {
-      const opt = document.createElement('option');
-      opt.value = b.name;
-      opt.dataset.fee = b.fee;
-      opt.dataset.id = b.id;
-      opt.textContent = `${b.name} (${b.fee === 0 ? 'Grátis' : 'R$ ' + b.fee.toFixed(2)})`;
-      bairroSelect.appendChild(opt);
-    });
-  }
-
   // Carrega opções de produtos do cardápio
   const prodSelect = document.getElementById('admin-order-product-select');
-  prodSelect.innerHTML = '';
-  (state.products || []).forEach(p => {
-    const opt = document.createElement('option');
-    opt.value = p.id;
-    opt.textContent = `${p.name} - R$ ${p.price.toFixed(2)}`;
-    prodSelect.appendChild(opt);
-  });
+  if (prodSelect) {
+    prodSelect.innerHTML = '';
+    (state.products || []).forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = `${p.name} - R$ ${p.price.toFixed(2)}`;
+      prodSelect.appendChild(opt);
+    });
+  }
 
   // Limpa formulário e itens temporários
   adminTempOrderItems = [];
@@ -1388,6 +1475,12 @@ function openModalAdminCreateOrder() {
   document.getElementById('admin-order-address').value = '';
   document.getElementById('admin-order-notes').value = '';
   document.getElementById('admin-order-product-qty').value = '1';
+  const kmInput = document.getElementById('admin-order-km');
+  if (kmInput) kmInput.value = '1.2';
+  const condoCheckbox = document.getElementById('admin-order-is-condo');
+  if (condoCheckbox) condoCheckbox.checked = false;
+  const feeInput = document.getElementById('admin-order-delivery-fee');
+  if (feeInput) feeInput.value = '8.00';
 
   // Seleciona Delivery como padrão
   const deliveryRadio = document.querySelector('input[name="admin_order_type"][value="b2c_delivery"]');
@@ -1416,21 +1509,69 @@ function adminOrderTypeChanged() {
     if (feeInput) feeInput.value = '0.00';
   } else {
     if (addrBox) addrBox.classList.remove('hidden');
-    adminBairroChanged();
+    adminOrderKmChanged();
   }
 
   adminUpdateOrderTotals();
 }
 
-function adminBairroChanged() {
-  const select = document.getElementById('admin-order-bairro-select');
-  const feeInput = document.getElementById('admin-order-delivery-fee');
-  const selectedOpt = select.options[select.selectedIndex];
-  if (selectedOpt && feeInput) {
-    const fee = parseFloat(selectedOpt.dataset.fee) || 0;
-    feeInput.value = fee.toFixed(2);
+function adminOrderAddressChanged() {
+  const addr = document.getElementById('admin-order-address')?.value.trim() || '';
+  const kmInput = document.getElementById('admin-order-km');
+  if (!addr || !kmInput) return;
+
+  const norm = addr.toLowerCase();
+  const ref = [
+    { match: ['santa marta', 'goiânia', 'goiania', 'jd santa marta'], km: 1.2 },
+    { match: ['parque real', 'pq real'], km: 2.0 },
+    { match: ['monte líbano', 'monte libano'], km: 2.8 },
+    { match: ['coophalis'], km: 3.2 },
+    { match: ['centro', 'cuiabá', 'cuiaba', 'amazonas', 'marechal rondon'], km: 3.5 },
+    { match: ['vila birigui', 'birigui'], km: 3.8 },
+    { match: ['primavera'], km: 4.0 },
+    { match: ['vila aurora', 'aurora', 'otávio pitaluga'], km: 4.2 },
+    { match: ['guanabara'], km: 4.5 },
+    { match: ['sagrada família', 'sagrada familia', 'lions'], km: 4.8 },
+    { match: ['vila operária', 'vila operaria', 'operária', 'bandeirantes'], km: 5.5 },
+    { match: ['belo horizonte', 'cidade alta'], km: 5.8 },
+    { match: ['iguassu'], km: 6.2 },
+    { match: ['atlântico', 'atlantico'], km: 7.5 },
+    { match: ['cidade salmen', 'salmen'], km: 7.8 },
+    { match: ['universitário', 'ufmt', 'ufr'], km: 8.5 },
+    { match: ['pedra 90'], km: 10.0 },
+    { match: ['distrito industrial'], km: 11.5 }
+  ];
+  const matched = ref.find(r => r.match.some(m => norm.includes(m)));
+  if (matched) {
+    kmInput.value = matched.km;
+    adminOrderKmChanged();
   }
+}
+
+function adminOrderKmChanged() {
+  const kmInput = document.getElementById('admin-order-km');
+  const condoCheckbox = document.getElementById('admin-order-is-condo');
+  const feeInput = document.getElementById('admin-order-delivery-fee');
+  if (!feeInput) return;
+
+  const km = kmInput ? parseFloat(kmInput.value) || 0 : 0;
+  const isCondo = condoCheckbox ? condoCheckbox.checked : false;
+
+  let fee = 0;
+  if (km > 0) {
+    if (km <= 2) fee = 8.00;
+    else if (km <= 16) fee = 8.00 + (Math.ceil(km) - 2) * 1.00;
+    else fee = 22.00 + (Math.ceil(km) - 16) * 1.00;
+
+    if (isCondo) fee += 5.00;
+  }
+
+  feeInput.value = fee.toFixed(2);
   adminUpdateOrderTotals();
+}
+
+function adminBairroChanged() {
+  adminOrderKmChanged();
 }
 
 function adminAddOrderItem() {
@@ -1529,9 +1670,11 @@ async function handleAdminCreateOrder(e) {
   const type = document.querySelector('input[name="admin_order_type"]:checked')?.value || 'b2c_delivery';
   const name = document.getElementById('admin-order-customer-name').value.trim();
   const phone = document.getElementById('admin-order-customer-phone').value.trim();
-  const bairro = type === 'b2c_balcao' ? 'Jardim Santa Marta' : document.getElementById('admin-order-bairro-select').value;
-  const address = type === 'b2c_balcao' ? 'Retirada no Balcão (Av. Goiânia, 346)' : document.getElementById('admin-order-address').value.trim();
-  const fee = type === 'b2c_balcao' ? 0 : (parseFloat(document.getElementById('admin-order-delivery-fee').value) || 0);
+  const isBalcao = type === 'b2c_balcao';
+  const address = isBalcao ? 'Retirada no Balcão (Av. Goiânia, 346)' : (document.getElementById('admin-order-address')?.value.trim() || '');
+  const kmVal = isBalcao ? 0.0 : (parseFloat(document.getElementById('admin-order-km')?.value) || 1.2);
+  const isCondo = isBalcao ? false : !!document.getElementById('admin-order-is-condo')?.checked;
+  const fee = isBalcao ? 0.00 : (parseFloat(document.getElementById('admin-order-delivery-fee')?.value) || 0.00);
   const paymentMethod = document.getElementById('admin-order-payment-method').value;
   const status = document.getElementById('admin-order-status').value || 'novo';
   const notes = document.getElementById('admin-order-notes').value.trim();
@@ -1548,8 +1691,10 @@ async function handleAdminCreateOrder(e) {
     type,
     customerName: name,
     customerPhone: phone,
-    bairro,
+    bairro: isBalcao ? 'Balcão' : 'Rondonópolis',
     address,
+    distanceKm: kmVal,
+    isCondominio: isCondo,
     deliveryFee: fee,
     subtotal,
     total,
@@ -2561,5 +2706,69 @@ async function confirmDeleteBairro(id, name) {
   } catch (err) {
     console.error(err);
     showToast('Falha ao excluir bairro.', 'error');
+  }
+}
+
+// ==========================================
+// 18. ADM: TABELA DE TAXAS POR KM (MOTOBOYS)
+// ==========================================
+function updateAdminKmPricingUI() {
+  const p = state.deliveryKmPricing;
+  if (!p) return;
+
+  const baseInput = document.getElementById('adm-input-base-fee');
+  const perKmInput = document.getElementById('adm-input-fee-per-km');
+  const afterMaxInput = document.getElementById('adm-input-fee-after-max');
+  const condoInput = document.getElementById('adm-input-condo-fee');
+  const originInput = document.getElementById('adm-input-origin-address');
+  const condoBadge = document.getElementById('adm-condo-badge-val');
+
+  const baseFee = parseFloat(p.baseFee || 8);
+  const feePerKm = parseFloat(p.feePerKm || 1);
+  const feeAfterMax = parseFloat(p.feeAfterMaxPerKm || 1);
+  const condoFee = parseFloat(p.condominioFee || 5);
+
+  if (baseInput) baseInput.value = baseFee.toFixed(2);
+  if (perKmInput) perKmInput.value = feePerKm.toFixed(2);
+  if (afterMaxInput) afterMaxInput.value = feeAfterMax.toFixed(2);
+  if (condoInput) condoInput.value = condoFee.toFixed(2);
+  if (originInput && p.originAddress) originInput.value = p.originAddress;
+  if (condoBadge) condoBadge.textContent = `R$ ${condoFee.toFixed(2)}`;
+
+  // Atualiza visualização das faixas de 2km a 16km
+  for (let k = 2; k <= 16; k++) {
+    const el = document.getElementById(`adm-km-val-${k}`);
+    if (el) {
+      const val = k <= 2 ? baseFee : baseFee + (k - 2) * feePerKm;
+      el.textContent = `R$ ${val.toFixed(2)}`;
+    }
+  }
+}
+
+async function saveAdminKmPricingSettings() {
+  const baseFee = parseFloat(document.getElementById('adm-input-base-fee')?.value) || 8;
+  const feePerKm = parseFloat(document.getElementById('adm-input-fee-per-km')?.value) || 1;
+  const feeAfterMaxPerKm = parseFloat(document.getElementById('adm-input-fee-after-max')?.value) || 1;
+  const condominioFee = parseFloat(document.getElementById('adm-input-condo-fee')?.value) || 5;
+  const originAddress = document.getElementById('adm-input-origin-address')?.value.trim() || 'Av. Goiânia, 346 - Jardim Santa Marta, Rondonópolis - MT';
+
+  try {
+    const res = await fetch(`${API_BASE}/delivery-km`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${state.adminToken}`
+      },
+      body: JSON.stringify({ baseFee, feePerKm, feeAfterMaxPerKm, condominioFee, originAddress })
+    });
+
+    if (!res.ok) throw new Error('Falha ao salvar tabela de KM.');
+
+    state.deliveryKmPricing = await res.json();
+    updateAdminKmPricingUI();
+    showToast('Tabela de taxas por KM atualizada com sucesso!', 'success');
+  } catch (e) {
+    console.error(e);
+    showToast('Erro ao salvar alterações da tabela de KM.', 'error');
   }
 }

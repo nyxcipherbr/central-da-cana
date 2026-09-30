@@ -248,6 +248,97 @@ app.delete('/api/bairros/:id', requireAdminAuth, (req, res) => {
 });
 
 // ==========================================
+// 7.1 TAXAS POR KM & DISTÂNCIA (TABELA OFICIAL MOTOBOYS)
+// ==========================================
+const RONDONOPOLIS_DISTANCE_REF = [
+  { match: ['balcão', 'balcao', 'retirar', 'retirada'], km: 0 },
+  { match: ['santa marta', 'goiânia', 'goiania', 'jd santa marta', 'jardim santa marta'], km: 1.2 },
+  { match: ['parque real', 'pq real'], km: 2.0 },
+  { match: ['monte líbano', 'monte libano'], km: 2.8 },
+  { match: ['coophalis'], km: 3.2 },
+  { match: ['centro', 'cuiabá', 'cuiaba', 'amazonas', 'marechal rondon', 'arnaldo estevão', 'arnaldo estevao'], km: 3.5 },
+  { match: ['vila birigui', 'birigui'], km: 3.8 },
+  { match: ['primavera', 'jardim primavera'], km: 4.0 },
+  { match: ['vila aurora', 'aurora', 'otávio pitaluga', 'otavio pitaluga'], km: 4.2 },
+  { match: ['guanabara', 'jardim guanabara'], km: 4.5 },
+  { match: ['sagrada família', 'sagrada familia', 'lions internacional', 'lions'], km: 4.8 },
+  { match: ['vila operária', 'vila operaria', 'operária', 'bandeirantes', 'médici', 'medici'], km: 5.5 },
+  { match: ['belo horizonte', 'cidade alta'], km: 5.8 },
+  { match: ['iguassu', 'jardim iguassu'], km: 6.2 },
+  { match: ['atlântico', 'atlantico', 'jardim atlântico'], km: 7.5 },
+  { match: ['cidade salmen', 'salmen'], km: 7.8 },
+  { match: ['parque universitário', 'parque universitario', 'universitário', 'ufmt', 'ufr'], km: 8.5 },
+  { match: ['pedra 90', 'pedra noventa'], km: 10.0 },
+  { match: ['distrito industrial', 'anel viário', 'anel viario'], km: 11.5 },
+  { match: ['gleba', 'zona rural'], km: 14.0 }
+];
+
+function calculateHaversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Raio da Terra em km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const straightKm = R * c;
+  // Fator de rota urbana em malha viária (cerca de 25% a mais que linha reta)
+  return Math.round(straightKm * 1.25 * 10) / 10;
+}
+
+app.get('/api/delivery-km', (req, res) => {
+  res.json(db.getDeliveryKmPricing());
+});
+
+app.put('/api/delivery-km', requireAdminAuth, (req, res) => {
+  const updated = db.updateDeliveryKmPricing(req.body);
+  res.json(updated);
+});
+
+app.post('/api/delivery/calculate-km', (req, res) => {
+  const { address, lat, lng, isCondominio, distanceKm: customKm } = req.body;
+  const pricing = db.getDeliveryKmPricing();
+
+  let finalDistanceKm = 3.0; // fallback padrão urbano
+  let calculationSource = 'default';
+
+  if (customKm !== undefined && customKm !== null && parseFloat(customKm) >= 0) {
+    finalDistanceKm = parseFloat(customKm);
+    calculationSource = 'custom';
+  } else if (lat && lng) {
+    const originLat = pricing.originLat || -16.4552;
+    const originLng = pricing.originLng || -54.6295;
+    finalDistanceKm = calculateHaversineKm(originLat, originLng, parseFloat(lat), parseFloat(lng));
+    calculationSource = 'gps';
+  } else if (address) {
+    const norm = address.toLowerCase();
+    const matched = RONDONOPOLIS_DISTANCE_REF.find(ref => 
+      ref.match.some(m => norm.includes(m))
+    );
+    if (matched) {
+      finalDistanceKm = matched.km;
+      calculationSource = 'neighborhood_match';
+    } else {
+      finalDistanceKm = 4.0;
+      calculationSource = 'estimated_average';
+    }
+  }
+
+  const deliveryFee = db.calculateDeliveryFee(finalDistanceKm, isCondominio);
+
+  res.json({
+    originAddress: pricing.originAddress,
+    destinationAddress: address || '',
+    distanceKm: finalDistanceKm,
+    deliveryFee: deliveryFee,
+    isCondominio: !!isCondominio,
+    pricingTable: pricing,
+    calculationSource
+  });
+});
+
+// ==========================================
 // 8. MOTOBOYS & ENTREGADORES (CRUD + ACERTO)
 // ==========================================
 app.get('/api/motoboys', (req, res) => {
@@ -292,12 +383,17 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`====================================================`);
-  console.log(`🌾 Central da Cana - Distribuição & Delivery`);
-  console.log(`📍 Av. Goiânia, 346 - Jardim Santa Marta, Rondonópolis/MT`);
-  console.log(`📱 Contato Josué: (66) 99683-3628`);
-  console.log(`🚀 Sistema rodando em http://localhost:${PORT}`);
-  console.log(`⚡ Desenvolvido por NyxCipher (Alexa) - (66) 99612-8149`);
-  console.log(`====================================================`);
-});
+let serverInstance = null;
+if (require.main === module) {
+  serverInstance = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`====================================================`);
+    console.log(`🌾 Central da Cana - Distribuição & Delivery`);
+    console.log(`📍 Av. Goiânia, 346 - Jardim Santa Marta, Rondonópolis/MT`);
+    console.log(`📱 Contato Josué: (66) 99683-3628`);
+    console.log(`🚀 Sistema rodando em http://localhost:${PORT}`);
+    console.log(`⚡ Desenvolvido por NyxCipher (Alexa) - (66) 99612-8149`);
+    console.log(`====================================================`);
+  });
+}
+
+module.exports = { app, serverInstance };

@@ -108,7 +108,19 @@
         "fee": 0,
         "time": "Pronto em 10 min"
       }
-    ]
+    ],
+    "deliveryKmPricing": {
+      "originAddress": "Av. Goiânia, 346 - Jardim Santa Marta, Rondonópolis - MT",
+      "originLat": -16.4552,
+      "originLng": -54.6295,
+      "baseKm": 2,
+      "baseFee": 8,
+      "feePerKm": 1,
+      "maxTableKm": 16,
+      "maxTableFee": 22,
+      "feeAfterMaxPerKm": 1,
+      "condominioFee": 5
+    }
   },
   "products": [
     {
@@ -256,7 +268,56 @@
       "isB2B": false
     }
   ],
-  "b2bClients": [],
+  "b2bClients": [
+    {
+      "id": "cli-1",
+      "name": "Pastelaria e Garapa da Praça",
+      "responsible": "Seu Vanderlei",
+      "phone": "66997123344",
+      "document": "12.345.678/0001-90",
+      "address": "Av. Marechal Rondon, 1020",
+      "bairro": "Centro",
+      "deliveryDays": "Terça e Sexta",
+      "priceTier": "Tabela Parceiro Ouro",
+      "creditLimit": 1500,
+      "currentDebt": 0,
+      "status": "ativo",
+      "notes": "Recebe 10 feixes toda semana às 07:00 da manhã.",
+      "createdAt": "2026-09-10T10:00:00Z"
+    },
+    {
+      "id": "cli-2",
+      "name": "Trailer Caldo Gelado Gaúcho",
+      "responsible": "Rogério Antunes",
+      "phone": "66998445566",
+      "document": "456.789.012-34",
+      "address": "Praça dos Carreiros, Box 04",
+      "bairro": "Centro",
+      "deliveryDays": "Segunda, Quarta e Sábado",
+      "priceTier": "Tabela Padrão",
+      "creditLimit": 800,
+      "currentDebt": 120,
+      "status": "ativo",
+      "notes": "Paga semanalmente todo sábado no Pix.",
+      "createdAt": "2026-09-15T14:30:00Z"
+    },
+    {
+      "id": "cli-3",
+      "name": "Lanchonete e Pastel Sabor Tropical",
+      "responsible": "Dona Neide",
+      "phone": "66996332211",
+      "document": "98.765.432/0001-11",
+      "address": "Rua Fernando Corrêa da Costa, 850",
+      "bairro": "Vila Operária",
+      "deliveryDays": "Quinta-feira",
+      "priceTier": "Tabela Especial Feirante",
+      "creditLimit": 600,
+      "currentDebt": 0,
+      "status": "ativo",
+      "notes": "Prefere cana raspada pronta para moagem.",
+      "createdAt": "2026-09-20T09:15:00Z"
+    }
+  ],
   "orders": [
     {
       "id": "ord-1790645685780",
@@ -289,92 +350,81 @@
   ],
   "financial": [
     {
-      "id": "fin-1790645310023",
+      "id": "fin-1",
       "type": "receita",
       "category": "venda_delivery",
-      "description": "Venda Concluída - Pedido #PED-1014 (Ana Paula Silva)",
-      "amount": 34,
+      "description": "Venda Delivery - Pedido #PED-1001",
+      "amount": 77,
       "paymentMethod": "pix",
-      "relatedOrderId": "ord-1790645310021",
-      "date": "2026-09-29",
-      "createdAt": "2026-09-29T01:28:30.023Z"
+      "relatedOrderId": "ord-1790645685780",
+      "date": "2026-09-30",
+      "createdAt": "2026-09-30T14:26:07.763Z"
     },
     {
-      "id": "fin-1790645310025",
+      "id": "fin-2",
       "type": "despesa",
       "category": "compra_cana_bruta",
-      "description": "Carga de Cana Sítio Recanto Verde (30 feixes)",
-      "amount": 540,
+      "description": "Carga de Cana Bruta - Produtor Rural Sítio Alvorada (50 feixes)",
+      "amount": 900,
       "paymentMethod": "pix",
       "relatedOrderId": null,
-      "date": "2026-09-29",
-      "createdAt": "2026-09-29T01:28:30.025Z"
+      "date": "2026-09-30",
+      "createdAt": "2026-09-30T14:26:07.763Z"
     },
     {
-      "id": "fin-1790645310034",
+      "id": "fin-3",
+      "type": "despesa",
+      "category": "embalagens_pet",
+      "description": "Compra de 500 garrafas PET 1L + 300 garrafas 500ml",
+      "amount": 420,
+      "paymentMethod": "pix",
+      "relatedOrderId": null,
+      "date": "2026-09-30",
+      "createdAt": "2026-09-30T14:26:07.763Z"
+    },
+    {
+      "id": "fin-4",
+      "type": "despesa",
+      "category": "combustivel_entrega",
+      "description": "Gasolina para moto de entrega de pedidos",
+      "amount": 70,
+      "paymentMethod": "dinheiro",
+      "relatedOrderId": null,
+      "date": "2026-09-30",
+      "createdAt": "2026-09-30T14:26:07.763Z"
+    },
+    {
+      "id": "fin-1790778372010",
       "type": "receita",
       "category": "venda_delivery",
-      "description": "Venda Concluída - Pedido #PED-1015 (Cliente Motoboy Teste)",
-      "amount": 37,
-      "paymentMethod": "dinheiro",
-      "relatedOrderId": "ord-1790645310032",
-      "date": "2026-09-29",
-      "createdAt": "2026-09-29T01:28:30.034Z"
+      "description": "Venda Concluída - Pedido #PED-1002 (Ana Paula Silva)",
+      "amount": 34,
+      "paymentMethod": "pix",
+      "relatedOrderId": "ord-1790778372006",
+      "date": "2026-09-30",
+      "createdAt": "2026-09-30T14:26:12.010Z"
     },
     {
-      "id": "fin-1790645310036",
+      "id": "fin-1790778372027",
+      "type": "receita",
+      "category": "venda_delivery",
+      "description": "Venda Concluída - Pedido #PED-1002 (Cliente Motoboy Teste)",
+      "amount": 37,
+      "paymentMethod": "dinheiro",
+      "relatedOrderId": "ord-1790778372025",
+      "date": "2026-09-30",
+      "createdAt": "2026-09-30T14:26:12.027Z"
+    },
+    {
+      "id": "fin-1790778372029",
       "type": "despesa",
       "category": "combustivel_entrega",
       "description": "Acerto Corridas Motoboy: Carlos Motoboy Teste (1 entregas x R$ 6.00)",
       "amount": 6,
       "paymentMethod": "pix",
       "relatedOrderId": null,
-      "date": "2026-09-29",
-      "createdAt": "2026-09-29T01:28:30.036Z"
-    },
-    {
-      "id": "fin-1790645393628",
-      "type": "receita",
-      "category": "venda_delivery",
-      "description": "Venda Concluída - Pedido #PED-1017 (Ana Paula Silva)",
-      "amount": 34,
-      "paymentMethod": "pix",
-      "relatedOrderId": "ord-1790645393625",
-      "date": "2026-09-29",
-      "createdAt": "2026-09-29T01:29:53.628Z"
-    },
-    {
-      "id": "fin-1790645393630",
-      "type": "despesa",
-      "category": "compra_cana_bruta",
-      "description": "Carga de Cana Sítio Recanto Verde (30 feixes)",
-      "amount": 540,
-      "paymentMethod": "pix",
-      "relatedOrderId": null,
-      "date": "2026-09-29",
-      "createdAt": "2026-09-29T01:29:53.630Z"
-    },
-    {
-      "id": "fin-1790645393639",
-      "type": "receita",
-      "category": "venda_delivery",
-      "description": "Venda Concluída - Pedido #PED-1018 (Cliente Motoboy Teste)",
-      "amount": 37,
-      "paymentMethod": "dinheiro",
-      "relatedOrderId": "ord-1790645393637",
-      "date": "2026-09-29",
-      "createdAt": "2026-09-29T01:29:53.639Z"
-    },
-    {
-      "id": "fin-1790645393640",
-      "type": "despesa",
-      "category": "combustivel_entrega",
-      "description": "Acerto Corridas Motoboy: Carlos Motoboy Teste (1 entregas x R$ 6.00)",
-      "amount": 6,
-      "paymentMethod": "pix",
-      "relatedOrderId": null,
-      "date": "2026-09-29",
-      "createdAt": "2026-09-29T01:29:53.640Z"
+      "date": "2026-09-30",
+      "createdAt": "2026-09-30T14:26:12.029Z"
     }
   ],
   "inventory": [

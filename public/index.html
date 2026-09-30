@@ -751,38 +751,148 @@
           </div>
         </div>
 
-        <!-- ABA 8: BAIRROS & TAXAS -->
+        <!-- ABA 8: TAXAS DE ENTREGA POR KM (TABELA OFICIAL MOTOBOYS) -->
         <div id="adm-content-bairros" class="adm-content space-y-6 hidden">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h4 class="text-base font-extrabold text-stone-800 flex items-center gap-2">
-                <i data-lucide="map-pin" class="w-5 h-5 text-cana-700"></i>
-                Bairros de Rondonópolis & Taxas de Entrega
+                <i data-lucide="gauge" class="w-5 h-5 text-cana-700"></i>
+                Tabela Oficial de Entregas por KM (Motoboys)
               </h4>
-              <p class="text-xs text-stone-500">Cadastre novos bairros e ajuste os valores de frete cobrados no delivery.</p>
+              <p class="text-xs text-stone-500">Calculada da saída (Av. Goiânia, 346 - Jd. Santa Marta) até o endereço do cliente.</p>
             </div>
-            <button onclick="openModalCreateBairro()" class="bg-cana-700 hover:bg-cana-800 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition">
-              <i data-lucide="plus-circle" class="w-4 h-4"></i>
-              <span>+ Novo Bairro</span>
+            <button onclick="saveAdminKmPricingSettings()" class="bg-cana-800 hover:bg-cana-900 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              <span>Salvar Alterações na Tabela</span>
             </button>
           </div>
 
-          <!-- Tabela de Bairros -->
-          <div class="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs">
-                <thead class="bg-stone-100 text-stone-600 uppercase font-extrabold border-b border-stone-200">
-                  <tr>
-                    <th class="p-3.5">Nome do Bairro</th>
-                    <th class="p-3.5">Taxa de Entrega (R$)</th>
-                    <th class="p-3.5">Tempo Estimado</th>
-                    <th class="p-3.5 text-right">Ações</th>
-                  </tr>
-                </thead>
-                <tbody id="bairros-table-body" class="divide-y divide-stone-200">
-                  <!-- Preenchido via JS -->
-                </tbody>
-              </table>
+          <!-- BANNER OFICIAL COM AS FAIXAS DA EMPRESA DE MOTOBOYS (IMAGEM ENVIADA) -->
+          <div class="bg-gradient-to-br from-stone-900 via-stone-900 to-cana-950 text-white p-5 rounded-3xl shadow-xl border border-garapa-400/20 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-black tracking-widest text-garapa-400 uppercase bg-white/10 px-2.5 py-1 rounded-lg">Desde 2020</span>
+                <h5 class="text-sm sm:text-base font-black tracking-wide text-white uppercase flex items-center gap-1.5">
+                  <i data-lucide="bike" class="w-4 h-4 text-garapa-400"></i>
+                  Entregas Para Empresas Oficial
+                </h5>
+              </div>
+              <div class="bg-amber-400 text-stone-950 font-black px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-md">
+                <i data-lucide="building-2" class="w-4 h-4 text-stone-900"></i>
+                <span>TAXA DE CONDOMÍNIO: <strong id="adm-condo-badge-val">R$ 5,00</strong></span>
+              </div>
+            </div>
+
+            <!-- Grade da Tabela de KM (Até 2km a 16km+) -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 text-xs">
+              <div class="bg-white/5 border border-white/10 p-2.5 rounded-xl text-center">
+                <span class="block text-stone-400 text-[10px] uppercase font-bold">Até 2 km</span>
+                <strong class="text-garapa-300 text-sm font-black" id="adm-km-val-2">R$ 8,00</strong>
+              </div>
+              <div class="bg-white/5 border border-white/10 p-2.5 rounded-xl text-center">
+                <span class="block text-stone-400 text-[10px] uppercase font-bold">Até 3 km</span>
+                <strong class="text-garapa-300 text-sm font-black" id="adm-km-val-3">R$ 9,00</strong>
+              </div>
+              <div class="bg-white/5 border border-white/10 p-2.5 rounded-xl text-center">
+                <span class="block text-stone-400 text-[10px] uppercase font-bold">Até 4 km</span>
+                <strong class="text-garapa-300 text-sm font-black" id="adm-km-val-4">R$ 10,00</strong>
+              </div>
+              <div class="bg-white/5 border border-white/10 p-2.5 rounded-xl text-center">
+                <span class="block text-stone-400 text-[10px] uppercase font-bold">Até 5 km</span>
+                <strong class="text-garapa-300 text-sm font-black" id="adm-km-val-5">R$ 11,00</strong>
+              </div>
+              <div class="bg-white/5 border border-white/10 p-2.5 rounded-xl text-center">
+                <span class="block text-stone-400 text-[10px] uppercase font-bold">Até 6 km</span>
+                <strong class="text-garapa-300 text-sm font-black" id="adm-km-val-6">R$ 12,00</strong>
+              </div>
+              <div class="bg-white/5 border border-white/10 p-2.5 rounded-xl text-center">
+                <span class="block text-stone-400 text-[10px] uppercase font-bold">Até 7 km</span>
+                <strong class="text-garapa-300 text-sm font-black" id="adm-km-val-7">R$ 13,00</strong>
+              </div>
+              <div class="bg-white/5 border border-white/10 p-2.5 rounded-xl text-center">
+                <span class="block text-stone-400 text-[10px] uppercase font-bold">Até 8 km</span>
+                <strong class="text-garapa-300 text-sm font-black" id="adm-km-val-8">R$ 14,00</strong>
+              </div>
+              <div class="bg-white/5 border border-white/10 p-2.5 rounded-xl text-center">
+                <span class="block text-stone-400 text-[10px] uppercase font-bold">Até 9 km</span>
+                <strong class="text-garapa-300 text-sm font-black" id="adm-km-val-9">R$ 15,00</strong>
+              </div>
+              <div class="bg-white/5 border border-white/10 p-2.5 rounded-xl text-center">
+                <span class="block text-stone-400 text-[10px] uppercase font-bold">Até 10 km</span>
+                <strong class="text-garapa-300 text-sm font-black" id="adm-km-val-10">R$ 16,00</strong>
+              </div>
+              <div class="bg-white/5 border border-white/10 p-2.5 rounded-xl text-center">
+                <span class="block text-stone-400 text-[10px] uppercase font-bold">Até 11 km</span>
+                <strong class="text-garapa-300 text-sm font-black" id="adm-km-val-11">R$ 17,00</strong>
+              </div>
+              <div class="bg-white/5 border border-white/10 p-2.5 rounded-xl text-center">
+                <span class="block text-stone-400 text-[10px] uppercase font-bold">Até 12 km</span>
+                <strong class="text-garapa-300 text-sm font-black" id="adm-km-val-12">R$ 18,00</strong>
+              </div>
+              <div class="bg-white/5 border border-white/10 p-2.5 rounded-xl text-center">
+                <span class="block text-stone-400 text-[10px] uppercase font-bold">Até 13 km</span>
+                <strong class="text-garapa-300 text-sm font-black" id="adm-km-val-13">R$ 19,00</strong>
+              </div>
+              <div class="bg-white/5 border border-white/10 p-2.5 rounded-xl text-center">
+                <span class="block text-stone-400 text-[10px] uppercase font-bold">Até 14 km</span>
+                <strong class="text-garapa-300 text-sm font-black" id="adm-km-val-14">R$ 20,00</strong>
+              </div>
+              <div class="bg-white/5 border border-white/10 p-2.5 rounded-xl text-center">
+                <span class="block text-stone-400 text-[10px] uppercase font-bold">Até 15 km</span>
+                <strong class="text-garapa-300 text-sm font-black" id="adm-km-val-15">R$ 21,00</strong>
+              </div>
+              <div class="bg-white/5 border border-white/10 p-2.5 rounded-xl text-center">
+                <span class="block text-stone-400 text-[10px] uppercase font-bold">Até 16 km</span>
+                <strong class="text-garapa-300 text-sm font-black" id="adm-km-val-16">R$ 22,00</strong>
+              </div>
+              <div class="bg-garapa-500/20 border border-garapa-400/40 p-2.5 rounded-xl text-center">
+                <span class="block text-garapa-200 text-[10px] uppercase font-bold">Após 16 km</span>
+                <strong class="text-garapa-300 text-sm font-black">+R$ 1 p/ km</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- FORMULÁRIO DE EDIÇÃO DAS REGRAS POR KM -->
+          <div class="bg-white rounded-3xl border border-stone-200 p-5 shadow-sm space-y-4">
+            <h5 class="text-sm font-bold text-stone-900 flex items-center gap-2">
+              <i data-lucide="sliders" class="w-4 h-4 text-cana-700"></i>
+              Configurações da Tabela de Frete por KM
+            </h5>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+              <div>
+                <label class="block font-bold text-stone-700 mb-1">Valor Base (Até 2 km) *</label>
+                <div class="relative">
+                  <span class="absolute left-3 top-2.5 text-stone-400 font-bold">R$</span>
+                  <input type="number" step="0.50" id="adm-input-base-fee" value="8.00" class="w-full pl-9 pr-3 py-2 bg-stone-50 border border-stone-300 rounded-xl font-bold focus:ring-2 focus:ring-cana-600 focus:outline-none">
+                </div>
+              </div>
+              <div>
+                <label class="block font-bold text-stone-700 mb-1">Adicional p/ KM (Até 16km) *</label>
+                <div class="relative">
+                  <span class="absolute left-3 top-2.5 text-stone-400 font-bold">R$</span>
+                  <input type="number" step="0.50" id="adm-input-fee-per-km" value="1.00" class="w-full pl-9 pr-3 py-2 bg-stone-50 border border-stone-300 rounded-xl font-bold focus:ring-2 focus:ring-cana-600 focus:outline-none">
+                </div>
+              </div>
+              <div>
+                <label class="block font-bold text-stone-700 mb-1">Adicional após 16 km *</label>
+                <div class="relative">
+                  <span class="absolute left-3 top-2.5 text-stone-400 font-bold">R$</span>
+                  <input type="number" step="0.50" id="adm-input-fee-after-max" value="1.00" class="w-full pl-9 pr-3 py-2 bg-stone-50 border border-stone-300 rounded-xl font-bold focus:ring-2 focus:ring-cana-600 focus:outline-none">
+                </div>
+              </div>
+              <div>
+                <label class="block font-bold text-stone-700 mb-1">Taxa de Condomínio *</label>
+                <div class="relative">
+                  <span class="absolute left-3 top-2.5 text-stone-400 font-bold">R$</span>
+                  <input type="number" step="0.50" id="adm-input-condo-fee" value="5.00" class="w-full pl-9 pr-3 py-2 bg-stone-50 border border-stone-300 rounded-xl font-bold focus:ring-2 focus:ring-cana-600 focus:outline-none">
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-bold text-stone-700 mb-1 text-xs">Endereço de Saída da Central da Cana</label>
+              <input type="text" id="adm-input-origin-address" value="Av. Goiânia, 346 - Jardim Santa Marta, Rondonópolis - MT" class="w-full px-3 py-2 bg-stone-50 border border-stone-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-cana-600 focus:outline-none">
             </div>
           </div>
         </div>
@@ -876,19 +986,28 @@
         </div>
       </div>
 
-      <!-- 2. Formulário de Endereço & Bairro de Rondonópolis -->
+      <!-- 2. Formulário de Endereço & Cálculo por KM da Central da Cana -->
       <div class="bg-stone-50 p-4 rounded-2xl border border-stone-200 space-y-3">
-        <h4 class="text-xs font-bold text-stone-800 uppercase tracking-wider flex items-center gap-1.5">
-          <i data-lucide="map-pin" class="w-3.5 h-3.5 text-cana-700"></i> Entrega ou Retirada
-        </h4>
-
-        <div>
-          <label class="block text-[11px] font-bold text-stone-700 mb-1">Local / Bairro de Rondonópolis *</label>
-          <select id="cart-bairro-select" onchange="updateCartDeliveryFee()" class="w-full px-3 py-2.5 bg-white border border-stone-300 rounded-xl text-xs font-medium focus:ring-2 focus:ring-cana-600 focus:outline-none">
-            <!-- Opções preenchidas via JS -->
-          </select>
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-bold text-stone-800 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-cana-700"></i> Entrega ou Retirada
+          </h4>
+          <span class="text-[10px] bg-garapa-100 text-cana-900 px-2 py-0.5 rounded-full font-bold">Saída: Av. Goiânia, 346</span>
         </div>
 
+        <!-- Seletor Delivery vs Balcão -->
+        <div class="grid grid-cols-2 gap-1.5 bg-stone-200/70 p-1 rounded-xl text-xs font-bold">
+          <button type="button" id="cart-type-delivery-btn" onclick="setCartDeliveryMode('delivery')" class="py-2 rounded-lg bg-cana-800 text-white shadow transition flex items-center justify-center gap-1.5">
+            <i data-lucide="bike" class="w-3.5 h-3.5"></i>
+            <span>🛵 Delivery por KM</span>
+          </button>
+          <button type="button" id="cart-type-balcao-btn" onclick="setCartDeliveryMode('balcao')" class="py-2 rounded-lg text-stone-700 hover:text-stone-900 transition flex items-center justify-center gap-1.5">
+            <i data-lucide="store" class="w-3.5 h-3.5"></i>
+            <span>🏬 Retirar no Balcão</span>
+          </button>
+        </div>
+
+        <!-- Dados do Cliente -->
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block text-[11px] font-bold text-stone-700 mb-1">Seu Nome *</label>
@@ -900,9 +1019,46 @@
           </div>
         </div>
 
-        <div id="cart-address-wrapper">
-          <label class="block text-[11px] font-bold text-stone-700 mb-1">Rua, Número e Ponto de Referência *</label>
-          <input type="text" id="cart-customer-address" placeholder="Ex: Rua Cuiabá, 140 - Próx. ao Mercado" class="w-full px-3 py-2 bg-white border border-stone-300 rounded-xl text-xs focus:ring-2 focus:ring-cana-600 focus:outline-none">
+        <!-- Campos de Endereço Delivery com Cálculo por KM -->
+        <div id="cart-delivery-fields" class="space-y-2.5">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-[11px] font-bold text-stone-700">Rua, Número e Bairro de Entrega *</label>
+              <button type="button" onclick="detectUserGpsLocation()" class="text-[10px] font-extrabold text-cana-700 hover:text-cana-900 flex items-center gap-1 bg-white border border-cana-300 px-2 py-0.5 rounded-lg shadow-xs hover:bg-cana-50 transition">
+                <i data-lucide="navigation" class="w-3 h-3 text-cana-600"></i> Usar Meu GPS
+              </button>
+            </div>
+            <input type="text" id="cart-customer-address" oninput="debounceCalculateKm()" placeholder="Ex: Rua Cuiabá, 140 - Centro (ou Vila Aurora)" class="w-full px-3 py-2.5 bg-white border border-stone-300 rounded-xl text-xs focus:ring-2 focus:ring-cana-600 focus:outline-none">
+          </div>
+
+          <!-- Checkbox Taxa de Condomínio -->
+          <label class="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-stone-200 cursor-pointer hover:bg-stone-50 text-xs transition">
+            <input type="checkbox" id="cart-is-condominio" onchange="calculateCartKmDeliveryFee()" class="w-4 h-4 text-cana-600 rounded border-stone-300 focus:ring-cana-500">
+            <span class="font-semibold text-stone-800">🏢 Entrega em Condomínio / Prédio <strong class="text-amber-700">(+ R$ 5,00)</strong></span>
+          </label>
+
+          <!-- Card de Cálculo por KM em Tempo Real -->
+          <div id="cart-km-result-box" class="p-3 bg-cana-50/80 border border-cana-200 rounded-xl space-y-1.5 text-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-stone-700 font-semibold flex items-center gap-1.5">
+                <i data-lucide="navigation-2" class="w-3.5 h-3.5 text-cana-700"></i>
+                <span id="cart-km-dist-label">Distância: ~1.2 km</span>
+              </span>
+              <span class="font-black text-cana-950 text-sm" id="cart-km-fee-label">Taxa: R$ 8,00</span>
+            </div>
+            <div class="flex items-center justify-between text-[10px] text-stone-500 pt-1 border-t border-cana-200/60">
+              <span>📍 Saída: Av. Goiânia, 346 (Jd. Santa Marta)</span>
+              <span class="text-cana-800 font-bold bg-white/80 px-1.5 py-0.5 rounded border border-cana-200">Tabela Oficial Motoboys</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Box Informativo Balcão -->
+        <div id="cart-balcao-info" class="hidden p-3 bg-garapa-50 border border-garapa-200 rounded-xl text-xs space-y-1">
+          <p class="font-bold text-cana-950 flex items-center gap-1">
+            <i data-lucide="store" class="w-4 h-4 text-garapa-600"></i> Retirada no Balcão (Grátis - R$ 0,00)
+          </p>
+          <p class="text-stone-600 text-[11px]">Seu pedido ficará pronto em ~10 min na <strong>Av. Goiânia, 346 - Jardim Santa Marta</strong>.</p>
         </div>
       </div>
 
@@ -1511,22 +1667,27 @@
           </div>
         </div>
 
-        <!-- Endereço e Bairro -->
+        <!-- Endereço e Cálculo de Entrega por KM (ADM) -->
         <div id="admin-order-address-box" class="space-y-2">
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-xs font-bold text-stone-700 mb-1">Bairro em Rondonópolis *</label>
-              <select id="admin-order-bairro-select" onchange="adminBairroChanged()" class="w-full px-3 py-2 bg-stone-50 border border-stone-300 rounded-xl text-xs focus:ring-2 focus:ring-cana-600 focus:outline-none">
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-stone-700 mb-1">Taxa de Entrega (R$)</label>
-              <input type="number" step="0.50" id="admin-order-delivery-fee" value="5.00" onchange="adminUpdateOrderTotals()" class="w-full px-3 py-2 bg-stone-50 border border-stone-300 rounded-xl text-xs focus:ring-2 focus:ring-cana-600 focus:outline-none">
-            </div>
-          </div>
           <div>
-            <label class="block text-xs font-bold text-stone-700 mb-1">Endereço Completo & Referência</label>
-            <input type="text" id="admin-order-address" placeholder="Ex: Rua Cuiabá, 55 - Próx. ao Posto" class="w-full px-3 py-2 bg-stone-50 border border-stone-300 rounded-xl text-xs focus:ring-2 focus:ring-cana-600 focus:outline-none">
+            <label class="block text-xs font-bold text-stone-700 mb-1">Endereço Completo & Bairro de Entrega *</label>
+            <input type="text" id="admin-order-address" oninput="adminOrderAddressChanged()" placeholder="Ex: Rua Cuiabá, 140 - Centro (ou Vila Aurora)" class="w-full px-3 py-2 bg-stone-50 border border-stone-300 rounded-xl text-xs focus:ring-2 focus:ring-cana-600 focus:outline-none">
+          </div>
+          <div class="grid grid-cols-3 gap-2 items-center">
+            <div>
+              <label class="block text-[11px] font-bold text-stone-700 mb-1">Distância (KM)</label>
+              <input type="number" step="0.1" id="admin-order-km" value="1.2" oninput="adminOrderKmChanged()" class="w-full px-3 py-2 bg-stone-50 border border-stone-300 rounded-xl text-xs font-bold focus:ring-2 focus:ring-cana-600 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-stone-700 mb-1">Taxa Entrega (R$)</label>
+              <input type="number" step="0.50" id="admin-order-delivery-fee" value="8.00" onchange="adminUpdateOrderTotals()" class="w-full px-3 py-2 bg-stone-50 border border-stone-300 rounded-xl text-xs font-black text-cana-900 focus:ring-2 focus:ring-cana-600 focus:outline-none">
+            </div>
+            <div class="pt-4">
+              <label class="flex items-center gap-1.5 cursor-pointer text-xs">
+                <input type="checkbox" id="admin-order-is-condo" onchange="adminOrderKmChanged()" class="w-4 h-4 text-cana-600 rounded">
+                <span class="text-[11px] font-bold text-stone-700">🏢 Condomínio (+R$5)</span>
+              </label>
+            </div>
           </div>
         </div>
 

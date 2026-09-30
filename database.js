@@ -65,7 +65,19 @@ const INITIAL_DATA = {
       { id: "b9", name: "Parque Real", fee: 5.00, time: "15-25 min" },
       { id: "b10", name: "Cidade Salmen", fee: 9.00, time: "30-45 min" },
       { id: "b0", name: "Retirar no Balcão (Av. Goiânia, 346)", fee: 0.00, time: "Pronto em 10 min" }
-    ]
+    ],
+    deliveryKmPricing: {
+      originAddress: "Av. Goiânia, 346 - Jardim Santa Marta, Rondonópolis - MT",
+      originLat: -16.4552,
+      originLng: -54.6295,
+      baseKm: 2,
+      baseFee: 8.00,
+      feePerKm: 1.00,
+      maxTableKm: 16,
+      maxTableFee: 22.00,
+      feeAfterMaxPerKm: 1.00,
+      condominioFee: 5.00
+    }
   },
   products: [
     // Caldos Tradicionais (B2C)
@@ -461,6 +473,11 @@ class Database {
         data.financial = INITIAL_DATA.financial;
         changed = true;
       }
+      if (!data.settings || !data.settings.deliveryKmPricing) {
+        if (!data.settings) data.settings = INITIAL_DATA.settings;
+        data.settings.deliveryKmPricing = INITIAL_DATA.settings.deliveryKmPricing;
+        changed = true;
+      }
       if (changed) {
         this.saveData(data);
       }
@@ -508,6 +525,57 @@ class Database {
     db.settings.adminPass = newPassword;
     this.saveData(db);
     return true;
+  }
+
+  // --- DELIVERY KM PRICING ---
+  getDeliveryKmPricing() {
+    const db = this.readData();
+    if (!db.settings.deliveryKmPricing) {
+      db.settings.deliveryKmPricing = INITIAL_DATA.settings.deliveryKmPricing;
+      this.saveData(db);
+    }
+    return db.settings.deliveryKmPricing;
+  }
+
+  updateDeliveryKmPricing(newPricing) {
+    const db = this.readData();
+    db.settings.deliveryKmPricing = {
+      ...(db.settings.deliveryKmPricing || INITIAL_DATA.settings.deliveryKmPricing),
+      ...newPricing
+    };
+    this.saveData(db);
+    return db.settings.deliveryKmPricing;
+  }
+
+  calculateDeliveryFee(distanceKm, isCondominio = false) {
+    const dist = parseFloat(distanceKm) || 0;
+    if (dist <= 0) return 0.00;
+
+    const pricing = this.getDeliveryKmPricing();
+    let fee = 0;
+
+    const baseKm = parseFloat(pricing.baseKm) || 2;
+    const baseFee = parseFloat(pricing.baseFee) || 8.00;
+    const feePerKm = parseFloat(pricing.feePerKm) || 1.00;
+    const maxTableKm = parseFloat(pricing.maxTableKm) || 16;
+    const maxTableFee = parseFloat(pricing.maxTableFee) || 22.00;
+    const feeAfterMaxPerKm = parseFloat(pricing.feeAfterMaxPerKm) || 1.00;
+
+    if (dist <= baseKm) {
+      fee = baseFee;
+    } else if (dist <= maxTableKm) {
+      const extraKm = Math.ceil(dist) - baseKm;
+      fee = baseFee + (extraKm * feePerKm);
+    } else {
+      const extraKm = Math.ceil(dist) - maxTableKm;
+      fee = maxTableFee + (extraKm * feeAfterMaxPerKm);
+    }
+
+    if (isCondominio) {
+      fee += (parseFloat(pricing.condominioFee) || 0);
+    }
+
+    return parseFloat(fee.toFixed(2));
   }
 
   // --- PRODUCTS (CRUD) ---
@@ -655,6 +723,8 @@ class Database {
       b2bClientId: orderData.b2bClientId || null,
       address: orderData.address || '',
       bairro: orderData.bairro || 'Jardim Santa Marta',
+      distanceKm: orderData.distanceKm !== undefined && orderData.distanceKm !== null ? parseFloat(orderData.distanceKm) : null,
+      isCondominio: !!orderData.isCondominio,
       deliveryFee: parseFloat(orderData.deliveryFee) || 0,
       items: orderData.items || [],
       subtotal: parseFloat(orderData.subtotal) || 0,

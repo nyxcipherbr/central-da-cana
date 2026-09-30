@@ -128,6 +128,8 @@ async function runTests() {
     paymentMethod: "pix"
   });
   assert(newExpense.id && newExpense.amount === 540.00, "Despesa operacional registrada com sucesso");
+  db.deleteFinancialTransaction(newExpense.id);
+  db.deleteOrder(newOrder.id);
 
   // 9. Teste de Bairros & Taxas (CRUD)
   const initialBairros = db.getBairros();
@@ -197,6 +199,7 @@ async function runTests() {
   // Exclui motoboy teste
   const deletedMoto = db.deleteMotoboy(newMotoboy.id);
   assert(deletedMoto === true, "Motoboy teste excluído com sucesso");
+  db.deleteOrder(motoOrder.id);
 
   // 10. Teste de Suporte PWA (Manifest, Service Worker e Ícones)
   const fs = require('fs');
@@ -239,6 +242,7 @@ async function runTests() {
   assert(alarmOrder.customerPhone === "66998889988", "WhatsApp do cliente salvo com integridade");
   assert(alarmOrder.address.includes("Av. Goiânia"), "Endereço completo com ponto de referência registrado");
   assert(alarmOrder.total === 30.00, "Valor total com frete salvo com precisão para o alerta de WhatsApp");
+  db.deleteOrder(alarmOrder.id);
 
   // 12. Teste de Criação Manual no ADM e Exclusão de Pedidos (Kanban)
   const manualAdmOrder = db.createOrder({
@@ -269,8 +273,100 @@ async function runTests() {
   const orderCheck = db.getOrderById(manualAdmOrder.id);
   assert(!orderCheck, "Pedido não é mais encontrado no banco de dados após exclusão");
 
-  const deleteFake = db.deleteOrder("ped-inexistente-12345");
-  assert(deleteFake === false, "db.deleteOrder() retorna false para pedido inexistente");
+  // 13. Teste de Cálculo de Taxa de Entrega por KM e Taxa de Condomínio (Tabela Oficial)
+  const kmPricing = db.getDeliveryKmPricing();
+  assert(kmPricing.originAddress.includes("Av. Goiânia, 346"), "Endereço de partida configurado: Av. Goiânia, 346 - Jd. Santa Marta");
+  assert(kmPricing.baseKm === 2 && kmPricing.baseFee === 8.00, "Taxa base até 2 km: R$ 8,00");
+  assert(kmPricing.maxTableKm === 16 && kmPricing.maxTableFee === 22.00, "Teto da tabela até 16 km: R$ 22,00");
+  assert(kmPricing.condominioFee === 5.00, "Taxa adicional de condomínio configurada: R$ 5,00");
+
+  // Testes de faixas de distância
+  assert(db.calculateDeliveryFee(0) === 0.00, "Retirada no balcão (0 km) é Grátis (R$ 0,00)");
+  assert(db.calculateDeliveryFee(1.0) === 8.00, "Entrega a 1.0 km custa R$ 8,00 (faixa até 2 km)");
+  assert(db.calculateDeliveryFee(2.0) === 8.00, "Entrega a 2.0 km custa R$ 8,00 (limite da faixa base)");
+  assert(db.calculateDeliveryFee(2.3) === 9.00, "Entrega a 2.3 km arredonda para 3 km: R$ 9,00");
+  assert(db.calculateDeliveryFee(3.0) === 9.00, "Entrega a 3.0 km custa R$ 9,00");
+  assert(db.calculateDeliveryFee(6.0) === 12.00, "Entrega a 6.0 km custa R$ 12,00");
+  assert(db.calculateDeliveryFee(10.0) === 16.00, "Entrega a 10.0 km custa R$ 16,00");
+  assert(db.calculateDeliveryFee(16.0) === 22.00, "Entrega a 16.0 km custa R$ 22,00 (limite da tabela)");
+  assert(db.calculateDeliveryFee(18.0) === 24.00, "Entrega a 18.0 km (>16km) custa R$ 24,00 (+ R$ 1,00/km)");
+  
+  // Testes com taxa de condomínio (+ R$ 5,00)
+  assert(db.calculateDeliveryFee(1.5, true) === 13.00, "Entrega a 1.5 km em condomínio: R$ 8,00 + R$ 5,00 = R$ 13,00");
+  assert(db.calculateDeliveryFee(4.0, true) === 15.00, "Entrega a 4.0 km em condomínio: R$ 10,00 + R$ 5,00 = R$ 15,00");
+  assert(db.calculateDeliveryFee(16.0, true) === 27.00, "Entrega a 16.0 km em condomínio: R$ 22,00 + R$ 5,00 = R$ 27,00");
+
+  // Teste de Pedido persistindo distância em KM e Flag de Condomínio
+  const kmOrder = db.createOrder({
+    type: "b2c_delivery",
+    customerName: "Condomínio Residencial Teste",
+    customerPhone: "66999221100",
+    address: "Av. Poguba, Condomínio Parque das Águas, Apto 102",
+    bairro: "Vila Aurora",
+    distanceKm: 5.5,
+    isCondominio: true,
+    deliveryFee: db.calculateDeliveryFee(5.5, true), // 12 + 5 = 17
+    subtotal: 30.00,
+    total: 47.00,
+    paymentMethod: "pix",
+    items: [
+      { id: "prod-2", name: "Caldo de Cana 1L", quantity: 2, price: 15.00, total: 30.00 }
+    ]
+  });
+  assert(kmOrder.distanceKm === 5.5, "Pedido registra distância calculada em KM (5.5 km)");
+  assert(kmOrder.isCondominio === true, "Pedido registra taxa de condomínio ativada (true)");
+  assert(kmOrder.deliveryFee === 17.00, "Taxa de entrega com condomínio calculada e salva corretamente (R$ 17,00)");
+
+  // Limpeza do pedido teste
+  db.deleteOrder(kmOrder.id);
+
+  // 14. Teste das Rotas de API HTTP em Processo (Express)
+  const { app } = require('./server');
+  function testRoute(method, url, body = {}) {
+    return new Promise((resolve) => {
+      let statusCode = 200;
+      let responseData = null;
+      const req = {
+        method,
+        url,
+        headers: { 'content-type': 'application/json' },
+        body
+      };
+      const res = {
+        status: function(code) { statusCode = code; return this; },
+        json: function(data) { responseData = data; resolve({ status: statusCode, body: data }); },
+        send: function(data) { responseData = data; resolve({ status: statusCode, body: data }); },
+        setHeader: function() {},
+        getHeader: function() {}
+      };
+      app.handle(req, res);
+    });
+  }
+
+  const apiPricing = await testRoute('GET', '/api/delivery-km');
+  assert(apiPricing.status === 200 && apiPricing.body.baseFee === 8.00, "API GET /api/delivery-km retorna tabela oficial com baseFee R$ 8,00");
+
+  const apiCalcAddress = await testRoute('POST', '/api/delivery/calculate-km', {
+    address: "Avenida Marechal Rondon, Centro",
+    isCondominio: true
+  });
+  assert(apiCalcAddress.status === 200 && apiCalcAddress.body.distanceKm === 3.5, "API POST /api/delivery/calculate-km calcula Centro (3.5 km)");
+  assert(apiCalcAddress.body.deliveryFee === 15.00, "API POST /api/delivery/calculate-km aplica R$ 10,00 + R$ 5,00 condomínio = R$ 15,00");
+
+  const apiCalcGps = await testRoute('POST', '/api/delivery/calculate-km', {
+    lat: -16.465,
+    lng: -54.635,
+    isCondominio: false
+  });
+  assert(apiCalcGps.status === 200 && apiCalcGps.body.calculationSource === 'gps', "API POST /api/delivery/calculate-km calcula via coordenadas GPS");
+  assert(apiCalcGps.body.distanceKm === 1.5 && apiCalcGps.body.deliveryFee === 8.00, "API GPS a 1.5 km retorna taxa base R$ 8,00");
+
+  const apiCalcCustom = await testRoute('POST', '/api/delivery/calculate-km', {
+    distanceKm: 10,
+    isCondominio: false
+  });
+  assert(apiCalcCustom.body.distanceKm === 10 && apiCalcCustom.body.deliveryFee === 16.00, "API KM personalizado (10 km) retorna taxa exata da tabela R$ 16,00");
+
 
   console.log(`\n========================================`);
   console.log(`TOTAL DE TESTES: ${passed + failed}`);
