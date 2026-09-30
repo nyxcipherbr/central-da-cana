@@ -452,52 +452,82 @@ const INITIAL_DATA = {
 
 class Database {
   constructor() {
+    this.data = null;
     this.init();
   }
 
   init() {
-    if (!fs.existsSync(DB_FILE)) {
-      this.saveData(INITIAL_DATA);
-    } else {
-      const data = this.readData();
-      let changed = false;
-      if (!data.b2bClients || data.b2bClients.length === 0) {
-        data.b2bClients = INITIAL_DATA.b2bClients;
-        changed = true;
-      }
-      if (!data.motoboys || data.motoboys.length === 0) {
-        data.motoboys = INITIAL_DATA.motoboys;
-        changed = true;
-      }
-      if (!data.financial || data.financial.length === 0 || !data.financial.some(f => f.type === 'despesa')) {
-        data.financial = INITIAL_DATA.financial;
-        changed = true;
-      }
-      if (!data.settings || !data.settings.deliveryKmPricing) {
-        if (!data.settings) data.settings = INITIAL_DATA.settings;
-        data.settings.deliveryKmPricing = INITIAL_DATA.settings.deliveryKmPricing;
-        changed = true;
-      }
-      if (changed) {
-        this.saveData(data);
-      }
+    this.data = this.readDataFromDisk();
+    let changed = false;
+    if (!this.data.b2bClients || this.data.b2bClients.length === 0) {
+      this.data.b2bClients = INITIAL_DATA.b2bClients;
+      changed = true;
     }
+    if (!this.data.motoboys || this.data.motoboys.length === 0) {
+      this.data.motoboys = INITIAL_DATA.motoboys;
+      changed = true;
+    }
+    if (!this.data.financial || this.data.financial.length === 0 || !this.data.financial.some(f => f.type === 'despesa')) {
+      this.data.financial = INITIAL_DATA.financial;
+      changed = true;
+    }
+    if (!this.data.settings || !this.data.settings.deliveryKmPricing) {
+      if (!this.data.settings) this.data.settings = INITIAL_DATA.settings;
+      this.data.settings.deliveryKmPricing = INITIAL_DATA.settings.deliveryKmPricing;
+      changed = true;
+    }
+    if (!this.data.products || this.data.products.length === 0) {
+      this.data.products = INITIAL_DATA.products;
+      changed = true;
+    }
+    if (!this.data.orders) {
+      this.data.orders = INITIAL_DATA.orders || [];
+      changed = true;
+    }
+    if (changed || !fs.existsSync(DB_FILE)) {
+      this.saveData(this.data);
+    }
+  }
+
+  readDataFromDisk() {
+    try {
+      if (fs.existsSync(DB_FILE)) {
+        const raw = fs.readFileSync(DB_FILE, 'utf-8');
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          return parsed;
+        }
+      }
+    } catch (err) {
+      console.error("Erro ao ler banco de dados do disco:", err);
+    }
+    return JSON.parse(JSON.stringify(INITIAL_DATA));
   }
 
   readData() {
-    try {
-      const raw = fs.readFileSync(DB_FILE, 'utf-8');
-      return JSON.parse(raw);
-    } catch (err) {
-      console.error("Erro ao ler banco de dados, recuperando...", err);
-      return INITIAL_DATA;
+    if (!this.data) {
+      this.data = this.readDataFromDisk();
     }
+    return this.data;
   }
 
   saveData(data) {
-    const tmpFile = `${DB_FILE}.tmp`;
-    fs.writeFileSync(tmpFile, JSON.stringify(data, null, 2), 'utf-8');
-    fs.renameSync(tmpFile, DB_FILE);
+    if (data) {
+      this.data = data;
+    }
+    if (!this.data) return;
+    try {
+      const tmpFile = `${DB_FILE}.tmp`;
+      fs.writeFileSync(tmpFile, JSON.stringify(this.data, null, 2), 'utf-8');
+      fs.renameSync(tmpFile, DB_FILE);
+    } catch (err) {
+      console.error("Erro ao salvar com tmpFile, gravando diretamente...", err);
+      try {
+        fs.writeFileSync(DB_FILE, JSON.stringify(this.data, null, 2), 'utf-8');
+      } catch (err2) {
+        console.error("Erro fatal ao salvar DB:", err2);
+      }
+    }
   }
 
   // --- SETTINGS & AUTH ---

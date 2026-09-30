@@ -350,6 +350,39 @@
   ],
   "financial": [
     {
+      "id": "fin-1790778372029",
+      "type": "despesa",
+      "category": "combustivel_entrega",
+      "description": "Acerto Corridas Motoboy: Carlos Motoboy Teste (1 entregas x R$ 6.00)",
+      "amount": 6,
+      "paymentMethod": "pix",
+      "relatedOrderId": null,
+      "date": "2026-09-30",
+      "createdAt": "2026-09-30T14:26:12.029Z"
+    },
+    {
+      "id": "fin-1790778372027",
+      "type": "receita",
+      "category": "venda_delivery",
+      "description": "Venda Concluída - Pedido #PED-1002 (Cliente Motoboy Teste)",
+      "amount": 37,
+      "paymentMethod": "dinheiro",
+      "relatedOrderId": "ord-1790778372025",
+      "date": "2026-09-30",
+      "createdAt": "2026-09-30T14:26:12.027Z"
+    },
+    {
+      "id": "fin-1790778372010",
+      "type": "receita",
+      "category": "venda_delivery",
+      "description": "Venda Concluída - Pedido #PED-1002 (Ana Paula Silva)",
+      "amount": 34,
+      "paymentMethod": "pix",
+      "relatedOrderId": "ord-1790778372006",
+      "date": "2026-09-30",
+      "createdAt": "2026-09-30T14:26:12.010Z"
+    },
+    {
       "id": "fin-1",
       "type": "receita",
       "category": "venda_delivery",
@@ -394,29 +427,18 @@
       "createdAt": "2026-09-30T14:26:07.763Z"
     },
     {
-      "id": "fin-1790778372010",
-      "type": "receita",
-      "category": "venda_delivery",
-      "description": "Venda Concluída - Pedido #PED-1002 (Ana Paula Silva)",
-      "amount": 34,
-      "paymentMethod": "pix",
-      "relatedOrderId": "ord-1790778372006",
-      "date": "2026-09-30",
-      "createdAt": "2026-09-30T14:26:12.010Z"
-    },
-    {
-      "id": "fin-1790778372027",
+      "id": "fin-1790780596353",
       "type": "receita",
       "category": "venda_delivery",
       "description": "Venda Concluída - Pedido #PED-1002 (Cliente Motoboy Teste)",
       "amount": 37,
       "paymentMethod": "dinheiro",
-      "relatedOrderId": "ord-1790778372025",
+      "relatedOrderId": "ord-1790780596352",
       "date": "2026-09-30",
-      "createdAt": "2026-09-30T14:26:12.027Z"
+      "createdAt": "2026-09-30T15:03:16.353Z"
     },
     {
-      "id": "fin-1790778372029",
+      "id": "fin-1790780596354",
       "type": "despesa",
       "category": "combustivel_entrega",
       "description": "Acerto Corridas Motoboy: Carlos Motoboy Teste (1 entregas x R$ 6.00)",
@@ -424,7 +446,7 @@
       "paymentMethod": "pix",
       "relatedOrderId": null,
       "date": "2026-09-30",
-      "createdAt": "2026-09-30T14:26:12.029Z"
+      "createdAt": "2026-09-30T15:03:16.354Z"
     }
   ],
   "inventory": [

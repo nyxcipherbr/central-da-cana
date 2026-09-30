@@ -409,7 +409,7 @@ function showToast(message, type = 'success') {
 // ==========================================
 async function loadSettings() {
   try {
-    const res = await fetch(`${API_BASE}/settings`);
+    const res = await fetch(`${API_BASE}/settings?_t=${Date.now()}`, { cache: 'no-store' });
     state.settings = await res.json();
   } catch (err) {
     console.error('Erro ao carregar configurações:', err);
@@ -418,7 +418,7 @@ async function loadSettings() {
 
 async function loadProducts() {
   try {
-    const res = await fetch(`${API_BASE}/products`);
+    const res = await fetch(`${API_BASE}/products?_t=${Date.now()}`, { cache: 'no-store' });
     state.products = await res.json();
   } catch (err) {
     console.error('Erro ao carregar produtos:', err);
@@ -710,7 +710,7 @@ function toggleCartDrawer() {
 
 async function loadDeliveryKmPricing() {
   try {
-    const res = await fetch(`${API_BASE}/delivery-km`);
+    const res = await fetch(`${API_BASE}/delivery-km?_t=${Date.now()}`, { cache: 'no-store' });
     if (res.ok) {
       state.deliveryKmPricing = await res.json();
       updateAdminKmPricingUI();
@@ -1281,7 +1281,7 @@ async function refreshAdminData() {
 // ==========================================
 async function loadAdminOrders(showNotification = true) {
   try {
-    const res = await fetch(`${API_BASE}/orders`);
+    const res = await fetch(`${API_BASE}/orders?_t=${Date.now()}`, { cache: 'no-store' });
     const orders = await res.json();
 
     // Detecta se entraram novos pedidos para despertar o alarme sonoro
@@ -1810,7 +1810,7 @@ async function updateOrderStatus(orderId, newStatus, paymentStatus = null, motob
 // ==========================================
 async function loadAdminB2BClients() {
   try {
-    const res = await fetch(`${API_BASE}/b2b-clients`);
+    const res = await fetch(`${API_BASE}/b2b-clients?_t=${Date.now()}`, { cache: 'no-store' });
     const clients = await res.json();
     state.adminData.b2bClients = clients;
 
@@ -1964,7 +1964,7 @@ async function confirmDeleteB2BClient(id, clientName) {
 // ==========================================
 async function loadAdminProducts() {
   try {
-    const res = await fetch(`${API_BASE}/products?b2b=true`);
+    const res = await fetch(`${API_BASE}/products?b2b=true&_t=${Date.now()}`, { cache: 'no-store' });
     const prods = await res.json();
     state.adminData.products = prods;
 
@@ -2145,7 +2145,8 @@ async function confirmDeleteProduct(id, productName) {
 // ==========================================
 async function loadAdminFinancial() {
   try {
-    const res = await fetch(`${API_BASE}/financial`, {
+    const res = await fetch(`${API_BASE}/financial?_t=${Date.now()}`, {
+      cache: 'no-store',
       headers: { 'Authorization': `Bearer ${state.adminToken}` }
     });
     if (!res.ok) return;
@@ -2366,7 +2367,8 @@ async function handleChangePassword(e) {
 // ==========================================
 async function loadAdminMotoboys() {
   try {
-    const res = await fetch(`${API_BASE}/motoboys/report`, {
+    const res = await fetch(`${API_BASE}/motoboys/report?_t=${Date.now()}`, {
+      cache: 'no-store',
       headers: { 'Authorization': `Bearer ${state.adminToken}` }
     });
     if (!res.ok) return;

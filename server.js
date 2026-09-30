@@ -8,6 +8,16 @@ const PORT = process.env.PORT || 3333;
 
 app.use(cors());
 app.use(express.json());
+
+// Desativa cache para todas as rotas da API (garante dados em tempo real sem fantasmas de cache)
+app.use('/api', (req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  res.set('Surrogate-Control', 'no-store');
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware de verificação de autenticação de admin simples por token/header
